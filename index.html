@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio Interactivo de HTML y CSS | Tecnicatura Superior en Logística</title>
+  <!-- Librería externa para efecto de confeti motivador -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --panel-bg: #ffffff;
+      --primary: #4f46e5;
+      --secondary: #ec4899;
+      --accent: #10b981;
+      --text-main: #1e293b;
+      --border-color: #cbd5e1;
+      --focus-ring: #000000;
+    }
+
+    /* Estilos para Modo Alto Contraste */
+    body.high-contrast {
+      --bg-color: #000000;
+      --panel-bg: #121212;
+      --primary: #ffff00;
+      --secondary: #00ffff;
+      --accent: #00ff00;
+      --text-main: #ffffff;
+      --border-color: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Verdana', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* CABECERA PRINCIPAL */
+    header {
+      background: linear-gradient(135deg, #4f46e5, #ec4899);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    body.high-contrast header {
+      background: #000000;
+      border-bottom: 4px solid #ffff00;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    /* BARRA DE ACCESIBILIDAD */
+    .accessibility-bar {
+      background: #e2e8f0;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    body.high-contrast .accessibility-bar {
+      background: #262626;
+    }
+
+    .btn-acc {
+      background: white;
+      border: 2px solid var(--text-main);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-acc:focus, .btn-acc:hover {
+      outline: 3px solid var(--focus-ring);
+      background: #f1f5f9;
+    }
+
+    /* ESTRUCTURA PRINCIPAL: MENÚ + CONTENIDO */
+    .app-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* MENÚ LATERAL DE TEMAS */
+    nav.sidebar {
+      width: 300px;
+      background: var(--panel-bg);
+      border-right: 3px solid var(--border-color);
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .menu-section-title {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin: 15px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 4px;
+    }
+
+    .menu-list {
+      list-style: none;
+    }
+
+    .menu-item {
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      background: var(--bg-color);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ÁREA DE TRABAJO DERECHA */
+    main.content-area {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    /* PANEL DE TEORÍA Y EXPLICACIÓN */
+    .theory-card {
+      background: var(--panel-bg);
+      border: 3px solid var(--primary);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .theory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .theory-title {
+      font-size: 1.4rem;
+      color: var(--primary);
+    }
+
+    .theory-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    /* ENTORNO DE SIMULACIÓN Y EDICIÓN */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      flex: 1;
+    }
+
+    .editor-panel, .preview-panel {
+      background: var(--panel-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.95rem;
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      resize: vertical;
+    }
+
+    .btn-run {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-run:hover, .btn-run:focus {
+      transform: scale(1.02);
+      outline: 3px solid var(--focus-ring);
+    }
+
+    /* VISTA PREVIA INTERACTIVA */
+    .preview-box {
+      flex: 1;
+      min-height: 250px;
+      border: 2px dashed var(--primary);
+      border-radius: 12px;
+      padding: 15px;
+      background: #ffffff;
+      color: #000000;
+      overflow: auto;
+    }
+
+    /* BOTÓN VOLVER AL INDEX */
+    .btn-back-portal {
+      text-decoration: none;
+      color: white;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    /* RESPONSIVE PARA PANTALLAS PEQUEÑAS */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+      nav.sidebar {
+        width: 100%;
+        max-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABECERA PRINCIPAL -->
+  <header>
+    <h1>📦 Laboratorio Interactivo de HTML y CSS</h1>
+    <p>Tecnicatura Superior en Logística - 1° Año</p>
+    <a href="index.html" class="btn-back-portal">⬅️ Volver al Portal Principal</a>
+  </header>
+
+  <!-- BARRA DE ACCESIBILIDAD Y APOYOS -->
+  <div class="accessibility-bar">
+    <button class="btn-acc" onclick="toggleContrast()">👁️ Modo Alto Contraste</button>
+    <button class="btn-acc" onclick="speakCurrentTheory()">🔊 Escuchar Explicación</button>
+    <button class="btn-acc" onclick="celebrateAchievement()">🎉 ¡Celebrar Logro!</button>
+  </div>
+
+  <div class="app-container">
+
+    <!-- MENÚ LATERAL DE TEMAS -->
+    <nav class="sidebar">
+      
+      <div class="menu-section-title">🧱 Temas HTML</div>
+      <ul class="menu-list">
+        <li class="menu-item active" onclick="loadTopic('h1_h6')">1. Títulos (h1 a h6)</li>
+        <li class="menu-item" onclick="loadTopic('p')">2. Párrafos (p)</li>
+        <li class="menu-item" onclick="loadTopic('lists')">3. Listas (ul, ol, li)</li>
+        <li class="menu-item" onclick="loadTopic('links')">4. Enlaces (&lt;a&gt;)</li>
+        <li class="menu-item" onclick="loadTopic('images')">5. Imágenes (&lt;img&gt;)</li>
+        <li class="menu-item" onclick="loadTopic('form')">6. Formularios (form, input)</li>
+        <li class="menu-item" onclick="loadTopic('tables')">7. Tablas (&lt;table&gt;)</li>
+      </ul>
+
+      <div class="menu-section-title">🎨 Temas CSS</div>
+      <ul class="menu-list">
+        <li class="menu-item" onclick="loadTopic('colors')">8. Colores y Texto</li>
+        <li class="menu-item" onclick="loadTopic('box_model')">9. Espaciado (Margin/Padding)</li>
+        <li class="menu-item" onclick="loadTopic('div_borders')">10. Cajas y Bordes (div)</li>
+        <li class="menu-item" onclick="loadTopic('buttons')">11. Botones Estilizados</li>
+        <li class="menu-item" onclick="loadTopic('flexbox')">12. Alineación con Flexbox</li>
+        <li class="menu-item" onclick="loadTopic('grid_cards')">13. Tarjetas en 3 Columnas (Grid)</li>
+      </ul>
+
+    </nav>
+
+    <!-- ÁREA DE TRABAJO PRINCIPAL -->
+    <main class="content-area">
+
+      <!-- TARJETA DE TEORÍA ACCESIBLE -->
+      <section class="theory-card">
+        <div class="theory-header">
+          <h2 class="theory-title" id="topicTitle">1. Títulos en HTML (h1 al h6)</h2>
+        </div>
+        <p class="theory-text" id="topicDescription">
+          Los títulos sirven para organizar y dar estructura jerárquica a la información de una página web, como los informes de almacenamiento y logística.
+          <code>&lt;h1&gt;</code> es el título principal y más grande, mientras que <code>&lt;h6&gt;</code> es el subtítulo más pequeño.
+        </p>
+      </section>
+
+      <!-- ENTORNO INTERACTIVO: EDITOR Y VISTA PREVIA -->
+      <div class="workspace-grid">
+
+        <!-- PANEL DE CÓDIGO (ENTRADA) -->
+        <div class="editor-panel">
+          <div class="panel-title">📝 Editor de Código</div>
+          
+          <label for="htmlInput">Código HTML:</label>
+          <textarea id="htmlInput" spellcheck="false"></textarea>
+
+          <label for="cssInput">Estilos CSS:</label>
+          <textarea id="cssInput" spellcheck="false"></textarea>
+
+          <button class="btn-run" onclick="updatePreview()">⚡ Ver Resultado en Pantalla</button>
+        </div>
+
+        <!-- PANEL DE RESULTADO (SALIDA VISUAL) -->
+        <div class="preview-panel">
+          <div class="panel-title">🖥️ Vista Previa Interactiva</div>
+          <div class="preview-box" id="previewOutput"></div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    /* BASE DE DATOS DE TEMAS, TEORÍA Y CÓDIGO DE EJEMPLO ADAPTADA A LOGÍSTICA */
+    const topics = {
+      'h1_h6': {
+        title: '1. Títulos en HTML (h1 al h6)',
+        desc: 'Los títulos sirven para estructurar reportes e informes web. <h1> representa el informe principal y <h6> la subsección de menor jerarquía.',
+        html: '<h1>Reporte General de Logística</h1>\n<h2>Gestión de Almacenes y Depósitos</h2>\n<h3>Inventario de Rotación Rápida (SKU)</h3>',
+        css: 'h1 {\n  color: #4f46e5;\n}\nh2 {\n  color: #ec4899;\n}'
+      },
+      'p': {
+        title: '2. Párrafos en HTML (<p>)',
+        desc: 'La etiqueta <p> representa un párrafo de texto. Sirve para describir procesos, procedimientos operativos estandarizados (POE) o novedades sobre la cadena de suministro.',
+        html: '<p>¡Bienvenidos estudiantes de 1° Año de la Tecnicatura Superior en Logística!</p>\n<p>En este módulo aprenderemos a digitalizar reportes de stock, trazabilidad de envíos y control de inventarios.</p>',
+        css: 'p {\n  font-size: 18px;\n  color: #334155;\n  line-height: 1.5;\n}'
+      },
+      'lists': {
+        title: '3. Listas en HTML (ul, ol, li)',
+        desc: 'Las listas sirven para listar insumos, equipos o pasos de una ruta de despacho. <ul> crea listas con viñetas y <ol> listas secuenciales ordenadas.',
+        html: '<h3>Checklist para Despacho de Carga:</h3>\n<ul>\n  <li>Verificación de Remito y Packing List</li>\n  <li>Inspección visual del contenedor</li>\n  <li>Control de peso e indicadores KPI</li>\n</ul>',
+        css: 'ul {\n  background-color: #f1f5f9;\n  padding: 20px 30px;\n  border-radius: 12px;\n}\nli {\n  font-weight: bold;\n  color: #0f172a;\n}'
+      },
+      'links': {
+        title: '4. Enlaces en HTML (<a>)',
+        desc: 'La etiqueta <a> permite conectar el sistema con plataformas de rastreo, proveedores o sistemas ERP mediante el atributo "href".',
+        html: '<h3>Sistemas de Gestión Consultados:</h3>\n<p>Accede al portal oficial de rastreo de <a href="https://www.argentina.gob.ar/transporte" target="_blank">Ministerio de Transporte</a> para consultar normativas.</p>',
+        css: 'a {\n  color: #0284c7;\n  font-weight: bold;\n  text-decoration: none;\n}\na:hover {\n  text-decoration: underline;\n  color: #0369a1;\n}'
+      },
+      'images': {
+        title: '5. Imágenes en HTML (<img>)',
+        desc: 'La etiqueta <img> muestra fotografías del centro de distribución, diagramas de flujo o esquemas de estanterías racks. Incluye "alt" para describir la imagen.',
+        html: '<h3>Centro de Distribución (CD):</h3>\n<img src="https://picsum.photos/400/200" alt="Fotografía de un centro logístico con pallets y autoelevadores">',
+        css: 'img {\n  width: 100%;\n  max-width: 400px;\n  border-radius: 12px;\n  box-shadow: 0 4px 10px rgba(0,0,0,0.15);\n}'
+      },
+      'form': {
+        title: '6. Formularios (form, input, button)',
+        desc: 'Los formularios permiten ingresar registros de ingreso de mercadería, búsqueda de código de producto (SKU) o consulta de guías de despacho.',
+        html: '<form onsubmit="return false;">\n  <label>Código SKU / Producto:</label><br>\n  <input type="text" placeholder="Ej: PAL-8829-X">\n  <br><br>\n  <button type="button" onclick="alert(\'¡Búsqueda de stock realizada!\')">Consultar Stock</button>\n</form>',
+        css: 'input {\n  padding: 8px;\n  font-size: 16px;\n  border-radius: 8px;\n  border: 2px solid #6366f1;\n}\nbutton {\n  background-color: #10b981;\n  color: white;\n  padding: 10px 15px;\n  border: none;\n  border-radius: 8px;\n  font-weight: bold;\n}'
+      },
+      'tables': {
+        title: '7. Tablas en HTML (table, tr, th, td)',
+        desc: 'Las tablas son indispensables en logística para mostrar planillas de control de stock, estado de pedidos, vehículos y rutas.',
+        html: '<table>\n  <tr>\n    <th>Código SKU</th>\n    <th>Producto</th>\n    <th>Stock Disponible</th>\n  </tr>\n  <tr>\n    <td>SKU-102</td>\n    <td>Pallets de Madera Standard</td>\n    <td>150 unidades</td>\n  </tr>\n  <tr>\n    <td>SKU-205</td>\n    <td>Cajas de Cartón Corrugado</td>\n    <td>500 unidades</td>\n  </tr>\n</table>',
+        css: 'table {\n  width: 100%;\n  border-collapse: collapse;\n}\nth, td {\n  border: 1px solid #cbd5e1;\n  padding: 10px;\n  text-align: left;\n}\nth {\n  background-color: #e0e7ff;\n  color: #3730a3;\n}'
+      },
+      'colors': {
+        title: '8. Colores y Fuentes en CSS',
+        desc: 'Permite destacar alertas de stock crítico, prioridades de envío o estados de pedidos mediante propiedades como "color" y "font-size".',
+        html: '<h2 class="urgente">⚠️ Estado: Entrega Demorada</h2>\n<p class="normal">📦 Estado: Mercadería en tránsito regular.</p>',
+        css: '.urgente {\n  color: #e11d48;\n  font-size: 26px;\n}\n.normal {\n  color: #0284c7;\n  font-size: 18px;\n}'
+      },
+      'box_model': {
+        title: '9. Espaciado en CSS (Padding y Margin)',
+        desc: 'Visualiza cómo se distribuyen las celdas y contenedores de datos de almacenamiento aplicando espacio interno (Padding) y externo (Margin).',
+        html: '<div class="caja1">Muelle A - Zona de Recepción (Padding interno)</div>\n<div class="caja2">Muelle B - Zona de Despacho (Margin externo)</div>',
+        css: '.caja1 {\n  background: #fef08a;\n  padding: 25px;\n  border: 2px solid #ca8a04;\n}\n.caja2 {\n  background: #bbf7d0;\n  margin-top: 20px;\n  padding: 10px;\n  border: 2px solid #166534;\n}'
+      },
+      'div_borders': {
+        title: '10. Cajas y Bordes (<div>)',
+        desc: 'Representa contenedores virtuales o módulos dentro del sistema informático logístico agrupando información clave.',
+        html: '<div class="tarjeta">\n  <h3>🚛 Ficha del Vehículo</h3>\n  <p>Camión Scania R450 - Capacidad: 28 Toneladas - Estado: En Ruta</p>\n</div>',
+        css: '.tarjeta {\n  background-color: #e0e7ff;\n  border: 4px solid #4f46e5;\n  border-radius: 16px;\n  padding: 20px;\n  text-align: center;\n}'
+      },
+      'buttons': {
+        title: '11. Botones Estilizados en CSS',
+        desc: 'Estiliza botones operativos para confirmar recepciones, emitir remitos o iniciar inventarios.',
+        html: '<button class="mi-boton">📦 Generar Orden de Despacho</button>',
+        css: '.mi-boton {\n  background-color: #ec4899;\n  color: white;\n  font-size: 18px;\n  padding: 12px 24px;\n  border: none;\n  border-radius: 25px;\n  cursor: pointer;\n  box-shadow: 0 4px 6px rgba(0,0,0,0.1);\n  transition: all 0.3s ease;\n}\n.mi-boton:hover {\n  background-color: #be185d;\n  transform: translateY(-2px);\n}'
+      },
+      'flexbox': {
+        title: '12. Alineación con Flexbox',
+        desc: 'Flexbox permite alinear indicadores logísticos o etapas del proceso de supply chain horizontal o verticalmente.',
+        html: '<div class="flex-contenedor">\n  <div class="caja">1. Recepción</div>\n  <div class="caja">2. Almacenamiento</div>\n  <div class="caja">3. Picking</div>\n</div>',
+        css: '.flex-contenedor {\n  display: flex;\n  justify-content: space-around;\n  align-items: center;\n  background-color: #f3e8ff;\n  padding: 15px;\n  border-radius: 12px;\n}\n.caja {\n  background-color: #9333ea;\n  color: white;\n  padding: 20px;\n  border-radius: 8px;\n  font-weight: bold;\n}'
+      },
+      'grid_cards': {
+        title: '13. Tarjetas en 3 Columnas con CSS Grid',
+        desc: 'Crea tableros de control (Dashboards) mostrando indicadores claves de desempeño (KPIs) organizados en 3 columnas.',
+        html: '<div class="grid-tarjetas">\n  <div class="tarjeta-col">\n    <h3>🏭 <br> WMS</h3>\n    <p>Gestión de Almacenes e Inventarios.</p>\n  </div>\n  <div class="tarjeta-col">\n    <h3>🚚 <br> TMS</h3>\n    <p>Gestión y Control del Transporte.</p>\n  </div>\n  <div class="tarjeta-col">\n    <h3>📊 <br> KPIs</h3>\n    <p>Medición del Nivel de Servicio (OTIF).</p>\n  </div>\n</div>',
+        css: '.grid-tarjetas {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 15px;\n}\n.tarjeta-col {\n  background-color: #e0f2fe;\n  border: 2px solid #0284c7;\n  border-radius: 12px;\n  padding: 15px;\n  text-align: center;\n}'
+      }
+    };
+
+    let currentTopicKey = 'h1_h6';
+
+    /* CARGAR UN TEMA DESDE EL MENÚ LATERAL */
+    function loadTopic(key) {
+      currentTopicKey = key;
+      const topic = topics[key];
+
+      // Actualizar teoría
+      document.getElementById('topicTitle').textContent = topic.title;
+      document.getElementById('topicDescription').innerHTML = topic.desc;
+
+      // Cargar código en editores
+      document.getElementById('htmlInput').value = topic.html;
+      document.getElementById('cssInput').value = topic.css;
+
+      // Actualizar estado activo en menú
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      
+      // Buscar el elemento clickeado o el correspondiente
+      const activeItem = Array.from(document.querySelectorAll('.menu-item')).find(el => el.getAttribute('onclick').includes(`'${key}'`));
+      if(activeItem) activeItem.classList.add('active');
+
+      // Actualizar pantalla
+      updatePreview();
+    }
+
+    /* ACTUALIZAR LA VISTA PREVIA INTERACTIVA */
+    function updatePreview() {
+      const htmlCode = document.getElementById('htmlInput').value;
+      const cssCode = document.getElementById('cssInput').value;
+      const output = document.getElementById('previewOutput');
+
+      // Inyectar HTML y CSS renderizado en tiempo real
+      output.innerHTML = `<style>${cssCode}</style>${htmlCode}`;
+    }
+
+    /* FUNCIONALIDAD DUA: SÍNTESIS DE VOZ EN ESPAÑOL */
+    function speakCurrentTheory() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Detener lecturas previas
+        const textToRead = document.getElementById('topicTitle').textContent + ". " + document.getElementById('topicDescription').textContent;
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("La síntesis de voz no está soportada en este navegador.");
+      }
+    }
+
+    /* FUNCIONALIDAD DUA: ALTO CONTRASTE */
+    function toggleContrast() {
+      document.body.classList.toggle('high-contrast');
+    }
+
+    /* FUNCIONALIDAD MOTIVADORA: CONFETI */
+    function celebrateAchievement() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance("¡Excelente trabajo! Has completado la práctica con éxito.");
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Cargar primer tema por defecto al iniciar
+    window.onload = function() {
+      loadTopic('h1_h6');
+    };
+  </script>
+</body>
+</html>
